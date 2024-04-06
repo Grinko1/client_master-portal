@@ -1,6 +1,5 @@
 package com.clientmaster.app.master.entity;
 
-import com.clientmaster.app.user.entity.MyUser;
 import com.clientmaster.app.visit.entity.Visit;
 import jakarta.persistence.*;
 import lombok.Getter;

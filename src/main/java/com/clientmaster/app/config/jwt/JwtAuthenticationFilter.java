@@ -1,16 +1,18 @@
 package com.clientmaster.app.config.jwt;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
+
+import com.clientmaster.app.user.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -18,94 +20,53 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    public static final String BEARER_PREFIX = "Bearer ";
+    public static final String HEADER_NAME = "Authorization";
+    private final JwtService jwtService;
+    private final UserService userService;
 
-//    @Autowired
-//    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private JwtTokenHelper jwtTokenHelper;
-
-    private final UserDetailsService userDetailsService;
-
-    @Autowired
-    public JwtAuthenticationFilter(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
-
-    //this doFilterInternal method will call when Hit API Request
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        //get jwt token from HttpServletRequest request
-        String requestToken = request.getHeader("Authorization");
-
-        //token starts with "Bearer 2005356251dfdferfd" --- token sample
-        System.out.println("Token is : "+requestToken);
-
-        //get username and actual token from the above token.
-        String username =null;
-        String token = null;
-
-        if(requestToken!= null && requestToken.startsWith("Bearer")) {
-
-            //actual token form jwt token
-            token = requestToken.substring(7);//token without Bearer
-
-            try {
-                // username from jwt token
-                username = this.jwtTokenHelper.getUsernameFromJWTToken(token);
-            } catch (IllegalArgumentException e) {
-                System.out.println("Unable to get JWT Token! ");
-            }
-            catch (ExpiredJwtException e) {
-                System.out.println("Your JWT Token is Expired!");
-            } catch (MalformedJwtException e) {
-                System.out.println("Invalid JWT Token!");
-            }
-
-
-
-
-
-        }else {
-            System.out.println("JWT Token doesn't begin with Bearer! ");
+        // Получаем токен из заголовка
+        var authHeader = request.getHeader(HEADER_NAME);
+        if (StringUtils.isEmpty(authHeader) || !StringUtils.startsWith(authHeader, BEARER_PREFIX)) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
+        // Обрезаем префикс и получаем имя пользователя из токена
+        String jwt = authHeader.substring(7).trim();
+        System.out.println("jwt is "+ jwt);
+        var username = jwtService.extractUserName(jwt);
+        System.out.println(username);
 
-        //token is get then validate the token
-        //validate jwt token
+        if (StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userService
+                    .userDetailsService()
+                    .loadUserByUsername(username);
 
-        if(username!=null && SecurityContextHolder.getContext().getAuthentication()==null) {
+            // Если токен валиден, то аутентифицируем пользователя
+            if (jwtService.isTokenValid(jwt, userDetails)) {
+                SecurityContext context = SecurityContextHolder.createEmptyContext();
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
 
-            if(this.jwtTokenHelper.validateToken(token, userDetails)){
-                //if true
-                //then do authentication / set authentication
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-
-
-            }else {
-                System.out.println("Invalid JWT Token!");
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                context.setAuthentication(authToken);
+                SecurityContextHolder.setContext(context);
             }
-
-
-        }else {
-            System.out.println("username is null and context is not null");
         }
-
-
-        //request filter...
         filterChain.doFilter(request, response);
-
-
     }
-
-
 }
