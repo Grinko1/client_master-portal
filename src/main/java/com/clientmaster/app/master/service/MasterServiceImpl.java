@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +32,11 @@ public class MasterServiceImpl implements MasterService {
     @Override
     public Master saveOrUpdate(Master master) {
         return masterRepository.save(master);
+    }
+
+    @Override
+    public Master findByUserId(Long id) {
+        return masterRepository.findByUserId(id).orElse(null);
     }
 
     @Override

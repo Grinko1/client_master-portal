@@ -1,5 +1,6 @@
 package com.clientmaster.app.client.dto;
 
+import com.clientmaster.app.user.entity.Profile;
 import lombok.*;
 
 @Getter
@@ -7,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ClientInfoDto {
+public class ClientInfoDto implements Profile {
     private Integer id;
     private String name;
     private String phone;

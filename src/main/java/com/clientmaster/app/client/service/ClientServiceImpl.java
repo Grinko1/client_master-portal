@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -37,5 +38,10 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public void deleteById(Integer id) {
         clientRepository.deleteById(id);
+    }
+
+    @Override
+    public Client findByUserId(Long userId) {
+        return clientRepository.findByUserId(userId).orElse(null);
     }
 }

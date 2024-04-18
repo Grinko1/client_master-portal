@@ -38,9 +38,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         var authHeader = request.getHeader(HEADER_NAME);
         if (StringUtils.isEmpty(authHeader) || !StringUtils.startsWith(authHeader, BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
+            System.out.println("wrong token "+authHeader);
             return;
         }
-
+        System.out.println("authHeader "+ authHeader);
         // Обрезаем префикс и получаем имя пользователя из токена
         String jwt = authHeader.substring(7).trim();
         System.out.println("jwt is "+ jwt);

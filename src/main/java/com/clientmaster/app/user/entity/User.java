@@ -1,5 +1,7 @@
 package com.clientmaster.app.user.entity;
 
+import com.clientmaster.app.client.entity.Client;
+import com.clientmaster.app.master.entity.Master;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,6 +34,10 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
+//    @OneToOne( cascade = CascadeType.ALL)
+//    private Client client;
+//    @OneToOne( cascade = CascadeType.ALL)
+//    private Master master;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
