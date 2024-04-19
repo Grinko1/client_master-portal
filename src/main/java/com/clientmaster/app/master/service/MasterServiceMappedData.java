@@ -35,10 +35,18 @@ public class MasterServiceMappedData {
     }
 
     public MasterInfoDto save(Master master) {
-        return modelMapper.map(masterService.saveOrUpdate(master), MasterInfoDto.class);
+        Master master1 = masterService.saveOrUpdate(master);
+        MasterInfoDto response =  modelMapper.map(master1, MasterInfoDto.class);
+        response.setUser_id(master1.getUser().getId());
+        return response;
+//        return modelMapper.map(masterService.saveOrUpdate(master), MasterInfoDto.class);
     }
     public MasterResponseDto update(Master master) {
-        return modelMapper.map(masterService.saveOrUpdate(master), MasterResponseDto.class);
+        Master master1 = masterService.saveOrUpdate(master);
+        MasterResponseDto response =  modelMapper.map(master1, MasterResponseDto.class);
+        response.setUser_id(master1.getUser().getId());
+        return response;
+//        return modelMapper.map(masterService.saveOrUpdate(master), MasterResponseDto.class);
     }
 
 

@@ -12,4 +12,5 @@ public class MasterInfoDto implements Profile {
     private Integer id;
     private String name;
     private String description;
+    private Long user_id;
 }

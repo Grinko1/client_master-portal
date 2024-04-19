@@ -12,4 +12,5 @@ public class ClientInfoDto implements Profile {
     private Integer id;
     private String name;
     private String phone;
+    private Long user_id;
 }

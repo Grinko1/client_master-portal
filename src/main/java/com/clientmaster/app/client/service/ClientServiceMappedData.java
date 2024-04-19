@@ -35,8 +35,10 @@ public class ClientServiceMappedData {
     }
 
     public ClientInfoDto saveOrUpdate(Client client) {
-        return modelMapper.map(clientService.saveOrUpdate(client), ClientInfoDto.class);
-
+        Client clientNew = clientService.saveOrUpdate(client);
+        ClientInfoDto dto = modelMapper.map(clientNew, ClientInfoDto.class);
+        dto.setUser_id(clientNew.getUser().getId());
+        return dto;
     }
 
     public void deleteById(Integer id) {

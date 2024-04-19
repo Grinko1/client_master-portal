@@ -1,5 +1,6 @@
 package com.clientmaster.app.client.repository;
 
+import com.clientmaster.app.client.dto.ClientInfoDto;
 import com.clientmaster.app.client.entity.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 

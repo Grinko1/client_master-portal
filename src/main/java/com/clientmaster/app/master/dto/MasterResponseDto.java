@@ -16,5 +16,6 @@ public class MasterResponseDto {
     private Integer id;
     private String name;
     private String description;
+    private Long user_id;
     private List<VisitToMasterDto> visits;
 }

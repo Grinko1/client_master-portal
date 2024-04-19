@@ -98,6 +98,6 @@ public class AuthenticationService {
         }
         System.out.println("profile " + profile);
         var jwt = jwtService.generateToken(user);
-        return new JwtAuthenticationResponse(jwt,profile, userData.getRole());
+        return new JwtAuthenticationResponse(jwt, profile, userData.getRole(), userData.getId());
     }
 }

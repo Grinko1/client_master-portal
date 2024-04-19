@@ -1,5 +1,6 @@
 package com.clientmaster.app.client.service;
 
+import com.clientmaster.app.client.dto.ClientInfoDto;
 import com.clientmaster.app.client.dto.ClientResponseDto;
 import com.clientmaster.app.client.entity.Client;
 import com.clientmaster.app.client.repository.ClientRepository;

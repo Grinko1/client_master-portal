@@ -18,5 +18,6 @@ public class JwtAuthenticationResponse {
     private String token;
     private Profile profile;
     private Role role;
+    private Long userId;
 }
 
