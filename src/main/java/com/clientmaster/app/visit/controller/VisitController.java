@@ -26,6 +26,13 @@ public class VisitController {
         System.out.println("all visit");
         return visitService.findAll();
     }
+
+    @Operation(summary = "Получение всех визитов клиента по id")
+    @GetMapping("/client/{clientID}")
+    public List<VisitResponseDto> getAllClientVisits (@PathVariable("clientID") Integer clientID ){
+        System.out.println("all client visits");
+        return visitService.findByClientID(clientID);
+    }
     @Operation(summary = "Получение визита по id")
     @GetMapping("/{id}")
     public VisitResponseDto getById(@PathVariable("id") Integer id){

@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface VisitService {
     List<VisitResponseDto> findAll();
+    List<VisitResponseDto> findByClientID(Integer id);
     VisitResponseDto findById(Integer id);
     VisitResponseDto saveOrUpdate(VisitRequestDto visit);
     void deleteById(Integer id);
