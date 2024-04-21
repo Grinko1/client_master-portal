@@ -37,6 +37,13 @@ public class VisitServiceImpl implements VisitService {
     }
 
     @Override
+    public List<VisitResponseDto> findByMasterID(Integer id) {
+        return  visitRepository.findByMasterId(id).stream()
+                .map(this::mapVisitToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public VisitResponseDto findById(Integer id) {
         Visit visit = visitRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Visit", "visitId", id));

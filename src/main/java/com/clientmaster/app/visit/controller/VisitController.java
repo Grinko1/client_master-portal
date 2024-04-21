@@ -33,6 +33,12 @@ public class VisitController {
         System.out.println("all client visits");
         return visitService.findByClientID(clientID);
     }
+    @Operation(summary = "Получение всех визитов мастера по id")
+    @GetMapping("/master/{masterID}")
+    public List<VisitResponseDto> getAllMasterVisits (@PathVariable("masterID") Integer masterID ){
+        System.out.println("all master visits");
+        return visitService.findByMasterID(masterID);
+    }
     @Operation(summary = "Получение визита по id")
     @GetMapping("/{id}")
     public VisitResponseDto getById(@PathVariable("id") Integer id){
