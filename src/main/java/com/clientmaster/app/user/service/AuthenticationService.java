@@ -6,6 +6,7 @@ import com.clientmaster.app.client.service.ClientService;
 import com.clientmaster.app.config.jwt.JwtAuthenticationResponse;
 import com.clientmaster.app.config.jwt.JwtService;
 import com.clientmaster.app.config.jwt.JwtSignUpResponse;
+import com.clientmaster.app.exceptions.AppError;
 import com.clientmaster.app.master.dto.MasterInfoDto;
 import com.clientmaster.app.master.entity.Master;
 import com.clientmaster.app.master.service.MasterService;
@@ -15,7 +16,10 @@ import com.clientmaster.app.user.entity.Role;
 import com.clientmaster.app.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,28 +43,20 @@ public class AuthenticationService {
      */
     public JwtSignUpResponse signUp(SignDto request) {
         System.out.println(request);
-        var user = User.builder()
-                .username(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                .build();
-        System.out.println(user);
-        User userData = userService.create(user);
+        try{
+            var user = User.builder()
+                    .username(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .role(request.getRole())
+                    .build();
+            User userData = userService.create(user);
 
-        var jwt = jwtService.generateToken(user);
-//        var id = userData.getId();
-//        Profile profile;
-//        if ( userData.getRole() == Role.CLIENT_ROLE) {
-//            profile = modelMapper.map(clientService.findByUserId(userData.getId()), ClientInfoDto.class);
-//
-//
-//        } else if (userData.getRole() == Role.MASTER_ROLE) {
-//            profile = modelMapper.map(masterService.findByUserId(userData.getId()), MasterInfoDto.class);
-//        } else {
-//            profile = null;
-//        }
-//        System.out.println("profile " + profile);
-        return new JwtSignUpResponse(jwt, user.getId());
+            var jwt = jwtService.generateToken(user);
+            return new JwtSignUpResponse(jwt, user.getId());
+        }catch (RuntimeException e){
+            throw e;
+        }
+
     }
 
     /**
@@ -70,10 +66,16 @@ public class AuthenticationService {
      * @return токен
      */
     public JwtAuthenticationResponse signIn(SignDto request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                request.getEmail(),
-                request.getPassword()
-        ));
+        System.out.println("sign in");
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    request.getEmail(),
+                    request.getPassword()
+            ));
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("Wrong email or password");
+        }
+
 
         var user = userService
                 .userDetailsService()
@@ -81,16 +83,15 @@ public class AuthenticationService {
         User userData = userService.getByUsername(request.getEmail());
 
 
-        System.out.println("userData " + userData.getRole());
         Profile profile = null; // Initialize to null
         if (userData != null) {
             if (userData.getRole() == Role.CLIENT_ROLE) {
-                Client clientInfo=  clientService.findByUserId(userData.getId());
+                Client clientInfo = clientService.findByUserId(userData.getId());
                 if (clientInfo != null) {
                     profile = modelMapper.map(clientInfo, ClientInfoDto.class);
                 }
             } else if (userData.getRole() == Role.MASTER_ROLE) {
-               Master masterInfo = masterService.findByUserId(userData.getId());
+                Master masterInfo = masterService.findByUserId(userData.getId());
                 if (masterInfo != null) {
                     profile = modelMapper.map(masterInfo, MasterInfoDto.class);
                 }

@@ -1,9 +1,8 @@
 package com.clientmaster.app.config.jwt;
 
+import com.clientmaster.app.exceptions.TokenExpiredException;
 import com.clientmaster.app.user.entity.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,10 +53,21 @@ public class JwtService {
      * @param userDetails данные пользователя
      * @return true, если токен валиден
      */
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String userName = extractUserName(token);
-        System.out.println(userName);
-        return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    public boolean isTokenValid(String token, UserDetails userDetails) throws TokenExpiredException  {
+
+//        final String userName = extractUserName(token);
+//        System.out.println(userName);
+//        return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
+        try {
+            final String userName = extractUserName(token);
+            return userName.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        } catch (ExpiredJwtException e) {
+            throw new TokenExpiredException("JWT token is expired");
+        } catch (MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
+            // Handle other JWT exceptions if needed
+            // Log the exception or throw a different exception if necessary
+            return false;
+        }
     }
 
     /**
@@ -114,8 +124,9 @@ public class JwtService {
      * @return данные
      */
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token)
-                .getBody();
+            return Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token)
+                    .getBody();
+
     }
 
     /**
